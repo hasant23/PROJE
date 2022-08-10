@@ -11,9 +11,25 @@ pipeline{
 		stage('Build') {
 
 			steps {
-				sh 'docker build -t hasant23/flask-app:1.0 .'
+				sh 'docker build -t hasant23/hello-python:latest .'
 			}
 		}
+	}
+	stage('SonarQube analysis') {
+		steps {
+			withSonarQubeEnv('sonarqube-container') {
+				// Optionally use a Maven environment you've configured already
+				 withMaven(maven:'maven') {
+					sh 'mvn clean install -Dproject.name=${commitHash} sonar:sonar'
+				}
+			}
+		}
+	}
+	stage("Quality Gate") {
+		steps {
+			waitForQualityGate abortPipeline: true
+		}
+	}
 
 		stage('Login') {
 
@@ -43,7 +59,7 @@ pipeline{
 							sh 'ssh username@102.10.16.23 kubectl apply -f /path/node-deployment.yaml --kubeconfig=/path/kube.yaml'
 
 							}catch(error)
-							{
+							
 
 							}
 					}
