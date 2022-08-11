@@ -11,25 +11,22 @@ pipeline{
 		stage('Build') {
 
 			steps {
-				sh 'docker build -t hasant23/hello-python:latest .'
+				sh 'docker build -t hasant23/hello-world:latest .'
 			}
 		}
 	}
-	stage('SonarQube analysis') {
-		steps {
-			withSonarQubeEnv('sonarqube-container') {
-				// Optionally use a Maven environment you've configured already
-				 withMaven(maven:'maven') {
-					sh 'mvn clean install -Dproject.name=${commitHash} sonar:sonar'
+		stage('SonarQube analysis') {
+			steps {
+				withSonarQubeEnv('sonarqube-container') 
+					
 				}
 			}
+		
+		stage("Quality Gate") {
+			steps {
+				waitForQualityGate abortPipeline: true
+			}
 		}
-	}
-	stage("Quality Gate") {
-		steps {
-			waitForQualityGate abortPipeline: true
-		}
-	}
 
 		stage('Login') {
 
@@ -42,7 +39,7 @@ pipeline{
 		stage('Push') {
 
 			steps {
-				sh 'docker push hasant23/flask-app:1.0'
+				sh 'docker push hasant23/hello-world:latest'
 			}
 		}
 
@@ -74,4 +71,4 @@ pipeline{
 		}
 	}
 
-}
+	}
